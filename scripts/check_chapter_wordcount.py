@@ -18,38 +18,51 @@ if sys.platform == 'win32':
 
 
 def count_chinese_words(text: str) -> int:
-    """统计中文字数（排除标点符号和Markdown标记）"""
-    # 移除Markdown标记
-    text = re.sub(r'#{1,6}\s*', '', text)  # 标题
-    text = re.sub(r'\*\*(.*?)\*\*', r'\1', text)  # 粗体
-    text = re.sub(r'\*(.*?)\*', r'\1', text)  # 斜体
-    text = re.sub(r'~~(.*?)~~', r'\1', text)  # 删除线
-    text = re.sub(r'`(.*?)`', r'\1', text)  # 行内代码
-    text = re.sub(r'\[(.*?)\]\(.*?\)', r'\1', text)  # 链接
-
+    """统计中文字数（排除标点符号和空格）"""
     # 统计中文字符（汉字）
-    chinese_chars = re.findall(r'[\u4e00-\u9fff]', text)
+    chinese_chars = re.findall(r'[一-鿿]', text)
     return len(chinese_chars)
 
 
 def extract_content_from_chapter(file_path: Path) -> str:
-    """从章节文件中提取正文内容（排除标题等元数据）"""
+    """从章节文件中提取正文内容"""
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
-    # 查找正文开始位置（通常是第一个一级标题或二级标题之后）
     lines = content.split('\n')
 
-    # 跳过开头的元数据（如 # 第XX章 标题）
-    content_start = 0
-    for i, line in enumerate(lines):
-        if line.startswith('#') and '章' in line:
-            content_start = i + 1
+    # 1. 跳过空行，找到章节标题（第XX章）
+    line_index = 0
+    while line_index < len(lines) and not lines[line_index].strip():
+        line_index += 1
+    if line_index < len(lines) and re.match(r'第\d+章', lines[line_index].strip()):
+        line_index += 1
+
+    # 2. 跳过元数据行（短内容的【】行）
+    METADATA_MAX_LEN = 15
+    while line_index < len(lines):
+        line = lines[line_index].strip()
+        if not line:
+            line_index += 1
+            continue
+        if line.startswith('【') and '】' in line and len(line) <= METADATA_MAX_LEN:
+            line_index += 1
+        else:
             break
 
-    # 提取正文
-    main_content = '\n'.join(lines[content_start:])
-    return main_content
+    # 3. 跳过空行，正文开始
+    while line_index < len(lines) and not lines[line_index].strip():
+        line_index += 1
+
+    # 4. 提取正文，直到【章末钩子】或【下章预告】
+    main_content_lines = []
+    for i in range(line_index, len(lines)):
+        line = lines[i].strip()
+        if line.startswith('【章末钩子】') or line.startswith('【下章预告】'):
+            break
+        main_content_lines.append(lines[i])
+
+    return '\n'.join(main_content_lines)
 
 
 def check_chapter(file_path: str, min_words: int = 2000, max_words: int = 3000) -> dict:
@@ -143,7 +156,6 @@ def print_results(results: list, min_words: int = 2000, max_words: int = 3000):
         print(f'\n⚠️  有 {failed} 章字数不在 {min_words}-{max_words} 字范围内，需要调整:')
         print('   - 字数不足时：添加细节描写（环境、心理、动作）、增加对话场景、扩展人物内心活动')
         print('   - 字数过多时：精简描写、合并对话、压缩场景')
-        print(f'\n   参考: references/content-expansion.md')
 
 
 def main():
@@ -157,10 +169,10 @@ def main():
         print('  检查所有章节: python check_chapter_wordcount.py --all <目录路径> [最小字数] [最大字数]')
         print('')
         print('示例:')
-        print('  python check_chapter_wordcount.py novels/故事/第01章.md')
-        print('  python check_chapter_wordcount.py novels/故事/第01章.md 2000 3000')
-        print('  python check_chapter_wordcount.py --all novels/故事')
-        print('  python check_chapter_wordcount.py --all novels/故事 2000 3000')
+        print('  python check_chapter_wordcount.py output/第01章.md')
+        print('  python check_chapter_wordcount.py output/第01章.md 2000 3000')
+        print('  python check_chapter_wordcount.py --all output/')
+        print('  python check_chapter_wordcount.py --all output/ 2000 3000')
         return
 
     if sys.argv[1] == '--all':

@@ -1,14 +1,6 @@
 ---
 name: novel-generator
 description: "根据用户提供的内容方向自动生成提示词并创作爽文小说。适用场景：(1) 用户提供小说方向/题材/关键词，(2) 需要生成章节连贯的长篇爽文，(3) 需要维护角色、地点、情节的连续性，(4) 需要为关键情节生成图解，(5) 需要记录生成失败场景以优化后续创作。支持都市、修仙、玄幻、重生、系统流等多种题材。Use when user asks to write a novel, generate fiction, create stories, or mentions 爽文/小说/写作。"
-license: MIT-0
-compatibility: "适用于 Claude Code、Cursor、OpenAI Codex、GitHub Copilot 等支持 Agent Skills 的工具。需要文件读写权限。"
-metadata:
-  author: kimo
-  version: "1.0.0"
-  language: zh-CN
-  category: creative-writing
-  tags: "novel, fiction, creative-writing, chinese, 爽文, 小说生成"
 ---
 # 爽文小说生成器
 
@@ -55,6 +47,7 @@ metadata:
 ## 第一步：提示词生成与完善
 
 用户只需提供一个方向，代理自动补全为完整的创作提示词。
+提示词指南见 `references/prompt-guide.md`，完整示例见 `references/examples.md`（示例一）。
 
 ### 用户输入示例
 
@@ -80,6 +73,7 @@ metadata:
 ```
 
 完善后的提示词保存到 `output/提示词.md`，并请用户确认或调整。
+详细模板见 `assets/PROMPT-TEMPLATE.md`（含完整提示词模板和快速模板）。
 
 ### 提示词质量检查
 
@@ -96,6 +90,7 @@ metadata:
 ## 第二步：大纲规划
 
 在提示词确认后、正式写作前，先生成全局大纲。
+情节结构参考：`references/plot-structures.md`。
 
 ### 大纲结构
 
@@ -143,22 +138,22 @@ metadata:
 
 ### 章节生成模板
 
-每章按以下结构生成：
+每章按以下结构生成（纯文本格式，无任何 Markdown 标记）：
+详见 `assets/CHAPTER-TEMPLATE.md`（含标准模板、特殊章节模板、检查清单）
+章节正文示例见 `references/examples.md`（示例二）
 
-```markdown
-# 第XX章 [章节名]
+```
+第XX章 [章节名]
 
-> **本章概要**：一句话概括本章核心事件
-> **本章爽点**：本章的主要爽感来源
-> **情绪曲线**：低开高走 / 层层递进 / 反转爆发
+【本章概要】一句话概括本章核心事件
+【本章爽点】本章的主要爽感来源
+【情绪曲线】低开高走 / 层层递进 / 反转爆发
 
----
 
 （正文内容，2000-3000字）
 
----
 
-> **章末钩子**：留下的悬念，引导读者继续
+【章末钩子】留下的悬念，引导读者继续
 ```
 
 ### 章节质量标准
@@ -205,6 +200,9 @@ python scripts/check_chapter_wordcount.py output/第01章.md 2000 3000
 ---
 
 ## 第四步：记忆管理
+
+记忆文件模板见 `assets/LEARNINGS-TEMPLATE.md`（含各记忆文件的格式规范）。
+记忆文件条目示例见 `references/examples.md`（示例三）。
 
 ### 写入时机
 
@@ -370,18 +368,3 @@ output/
 - 提示你输入小说方向
 
 详见 `scripts/init-novel.sh`。
-
----
-
-## 与 self-improving-agent 的协作
-
-本技能的 `.learnings/` 系统参考了 `self-improving-agent` 的设计理念：
-
-| self-improving-agent | novel-generator       |
-| -------------------- | --------------------- |
-| 记录代码错误         | 记录剧情穿帮          |
-| 记录知识空白         | 记录设定矛盾          |
-| 提升到 CLAUDE.md     | 沉淀到 STORY_BIBLE.md |
-| 提取为技能           | 提炼为创作模式        |
-
-核心思想一致：**捕获 → 记录 → 沉淀 → 复用**。
