@@ -19,42 +19,66 @@ if sys.platform == 'win32':
 
 def count_chinese_words(text: str) -> int:
     """统计中文字数（排除标点符号和空格）"""
-    # 统计中文字符（汉字）
-    chinese_chars = re.findall(r'[一-鿿]', text)
+    # 统计中文字符（汉字），排除括号内的结构标记
+    # 过滤掉形如（开篇：...）（发展：...）等结构标记
+    clean_text = re.sub(r'（[^）]+）', '', text)
+    chinese_chars = re.findall(r'[一-鿿]', clean_text)
     return len(chinese_chars)
 
 
 def extract_content_from_chapter(file_path: Path) -> str:
-    """从章节文件中提取正文内容"""
+    """从章节文件中提取正文内容
+
+    固定模板格式：
+    第XX章 [章节名]
+
+    【本章概要】...
+    【本章爽点】...
+    【情绪曲线】...
+    【涉及角色】...
+    【涉及地点】...
+
+    （开篇：...）
+    （发展：...）
+    （高潮：...）
+    （收束：...）
+
+    【章末钩子】...
+    【下章预告】...
+    """
     with open(file_path, 'r', encoding='utf-8') as f:
         content = f.read()
 
     lines = content.split('\n')
 
-    # 1. 跳过空行，找到章节标题（第XX章）
+    # 1. 找到【涉及地点】那一行，正文从下一行开始
     line_index = 0
-    while line_index < len(lines) and not lines[line_index].strip():
-        line_index += 1
-    if line_index < len(lines) and re.match(r'第\d+章', lines[line_index].strip()):
-        line_index += 1
-
-    # 2. 跳过元数据行（短内容的【】行）
-    METADATA_MAX_LEN = 15
+    found_meta = False
     while line_index < len(lines):
         line = lines[line_index].strip()
-        if not line:
+        if line.startswith('【涉及地点】'):
+            found_meta = True
             line_index += 1
-            continue
-        if line.startswith('【') and '】' in line and len(line) <= METADATA_MAX_LEN:
-            line_index += 1
-        else:
             break
+        line_index += 1
 
-    # 3. 跳过空行，正文开始
+    if not found_meta:
+        # 兜底：跳过前5行（章节标题 + 空行 + 4个元数据行）
+        line_index = 0
+        while line_index < len(lines) and not lines[line_index].strip():
+            line_index += 1
+        if line_index < len(lines) and re.match(r'第\d+章', lines[line_index].strip()):
+            line_index += 1
+        while line_index < len(lines) and lines[line_index].strip():
+            line_index += 1
+        while line_index < len(lines) and not lines[line_index].strip():
+            line_index += 1
+
+    # 2. 跳过空行
     while line_index < len(lines) and not lines[line_index].strip():
         line_index += 1
 
-    # 4. 提取正文，直到【章末钩子】或【下章预告】
+    # 3. 提取正文，直到【章末钩子】或【下章预告】
     main_content_lines = []
     for i in range(line_index, len(lines)):
         line = lines[i].strip()

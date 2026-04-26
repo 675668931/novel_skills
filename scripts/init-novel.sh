@@ -49,14 +49,9 @@ fi
 
 # 判断是目录路径还是小说名
 if [[ "$NOVEL_NAME" == *"/"* ]]; then
-    # 包含/，视为目录路径，转换为绝对路径
-    if [[ "$NOVEL_NAME" == /* ]]; then
-        # 绝对路径
-        NOVEL_DIR="$(mkdir -p "$NOVEL_NAME" && cd "$NOVEL_NAME" && pwd)"
-    else
-        # 相对路径含/
-        NOVEL_DIR="$(cd "$(dirname "$NOVEL_NAME")" && mkdir -p "$(basename "$NOVEL_NAME")" && cd "$(basename "$NOVEL_NAME")" && pwd)"
-    fi
+    # 包含/，视为完整路径，直接创建
+    mkdir -p "$NOVEL_NAME"
+    NOVEL_DIR="$(cd "$NOVEL_NAME" && pwd)"
 else
     # 不含/，视为小说名，在当前目录下创建
     NOVEL_DIR="$(pwd)/$NOVEL_NAME"
@@ -78,7 +73,8 @@ mkdir -p "$NOVEL_DIR/output"
 log_step "复制模板文件..."
 cp -r "$SKILL_DIR/.learnings/" "$NOVEL_DIR/.learnings"
 cp -r "$SKILL_DIR/references/" "$NOVEL_DIR/references"
-cp -r "$SKILL_DIR/scripts/" "$NOVEL_DIR/scripts"
+mkdir -p "$NOVEL_DIR/scripts"
+cp "$SKILL_DIR/scripts/"*.py "$NOVEL_DIR/scripts/"
 
 echo ""
 log_info "初始化完成！"
