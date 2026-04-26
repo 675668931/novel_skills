@@ -626,18 +626,21 @@ output/
 
 ---
 
-## 初始化新小说
+### 初始化新小说
 
-使用初始化脚本快速创建一部新小说的工作区：
+在用户确认提示词（包含小说名）后，使用初始化脚本创建项目工作区：
 
 ```bash
-./scripts/init-novel.sh 小说名称
+${SKILL_DIR}/scripts/init-novel.sh <小说项目目录>
 ```
+
+**时机**：先由 AI 代理根据用户方向生成小说名和提示词 → 用户确认提示词 → 初始化项目。
 
 这会创建：
 
 - `output/` 目录
-- 清空 `.learnings/` 中的旧记录（保留模板头部）
-- 提示你输入小说方向
+- `.learnings/` 记忆文件（从 skill 复制）
+- `references/` 参考指南（从 skill 复制）
+- `scripts/` 脚本（从 skill 复制）
 
-详见 `scripts/init-novel.sh`。
+详见 `${SKILL_DIR}/scripts/init-novel.sh`。
