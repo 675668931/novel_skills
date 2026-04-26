@@ -71,9 +71,10 @@ def check_chapter(path: Path) -> dict:
 
 def find_chapter(num: str) -> Path | None:
     """通过序号查找章节文件"""
-    num = num.lstrip('0') or '0'
-    for length in [1, 2, 3]:
-        matches = list(Path('output').glob(f'第{num.zfill(length)}章*.md'))
+    # 去除前导零但不变成空字符串，如 '07' -> 7, '7' -> 7, '007' -> 7
+    num_str = str(int(num)) if num.isdigit() else num
+    for pattern in [f'第{num_str}章*.md', f'第{num.zfill(2)}章*.md', f'第{num.zfill(3)}章*.md']:
+        matches = list(Path('output').glob(pattern))
         if matches:
             return matches[0]
     return None
