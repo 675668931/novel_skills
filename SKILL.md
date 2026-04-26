@@ -351,6 +351,20 @@ output/提示词.md        → 主角设定、世界观、爽点设计
 （冲击：角色和读者的情绪反应）
 ```
 
+### 章节字数检查
+
+::: warning
+**【强制】字数统计必须使用 `scripts/check_chapter_wordcount.py` 脚本，禁止AI自行估算。每章字数必须控制在 2000-3000 字范围内，超出或不足都必须调整至达标后方可移入 output/。**
+:::
+
+```bash
+# 检查单个章节（必须执行）
+python scripts/check_chapter_wordcount.py 01
+
+# 检查所有章节
+python scripts/check_chapter_wordcount.py --all
+```
+
 ### 章节生成检查清单
 
 每章生成后自检：
@@ -371,6 +385,7 @@ output/提示词.md        → 主角设定、世界观、爽点设计
 - [ ] 对话有角色个性差异
 - [ ] 章末有钩子/悬念
 - [ ] 主角有可感知的成长或收获
+- [ ] 已使用 `scripts/check_chapter_wordcount.py` 统计字数
 
 **记忆更新检查：**
 - [ ] 新角色已记录到 CHARACTERS.md
@@ -378,29 +393,6 @@ output/提示词.md        → 主角设定、世界观、爽点设计
 - [ ] 新地点已记录到 LOCATIONS.md
 - [ ] 关键情节已记录到 PLOT_POINTS.md
 - [ ] 如有关键场景，已生成图解
-
-### 章节字数检查
-
-::: warning
-**【强制】字数不达标的章节，必须扩充至 2000-3000 字后方可移入 output/。**
-:::
-
-生成章节后，使用字数检查脚本验证字数是否达标：
-
-```bash
-# 检查单个章节
-python scripts/check_chapter_wordcount.py output/第01章.md
-
-# 检查所有章节
-python scripts/check_chapter_wordcount.py --all output/
-
-# 指定字数范围（默认2000-3000字）
-python scripts/check_chapter_wordcount.py output/第01章.md 2000 3000
-```
-
-**字数标准**：每章 2000-3000 字，不足时添加细节描写（环境/心理/动作）、增加对话场景、扩展人物内心活动、补充背景故事。
-
-详见 `scripts/check_chapter_wordcount.py`
 
 ---
 
