@@ -205,7 +205,7 @@ description: "根据用户提供的内容方向自动生成提示词并创作爽
 
 ### 大纲结构
 
-参考示例：`/root/novel/地球OL：登录寒武纪/output/大纲.md`
+参考示例：`references/examples.md`（示例四）
 
 ```markdown
 # 《小说名》大纲
