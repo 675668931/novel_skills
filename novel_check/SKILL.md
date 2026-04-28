@@ -69,7 +69,6 @@ output/ 目录下共有 X 个检查报告：
 
 ```
 output/大纲.md              → 主线进度对照
-output/提示词.md            → 设定基准
 output/第XX章_*.md          → 需要检查的章节
 output/检查报告_*.md         → 已有报告（用于问题追踪）
 .learnings/CHARACTERS.md    → 角色状态记录
